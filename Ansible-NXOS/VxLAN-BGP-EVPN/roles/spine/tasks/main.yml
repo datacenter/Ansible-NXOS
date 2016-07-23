@@ -1,0 +1,111 @@
+
+
+    - name: ENABLE NECESSARY FEATURES
+      nxos_feature:
+        feature: "{{item.feature }}"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ features }}"
+
+
+    - name: IP INFO
+      nxos_interface:
+        interface: "{{item.interface }}"
+        mode: layer3
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ interfaces }}"
+
+    - name: IP INFO
+      nxos_interface:
+        interface: "{{ item.interface }}"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ loopbacks }}"
+
+
+    - name: IP ADDR
+      nxos_ip_interface:
+        interface: "{{ item.interface }}"
+        addr: "{{ item.addr }}"
+        mask: "{{ item.mask }}"
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ interfaces }}"
+      - "{{ loopbacks }}"
+
+    - name: CHANGE INTERFACES MTU TO 9126
+      nxos_mtu: 
+        mtu: 9126
+        interface: "{{ item.interface }}"
+        state: present
+        host: "{{ inventory_hostname }}"
+      with_items: "{{ interfaces }}"
+
+    - name: SET THE ROUTER ID FOR THE DEFAULT VRF
+      nxos_ospf_vrf:
+        ospf: 1
+        router_id: "{{ router_id }}"
+        provider: "{{ nxos_provider }}"
+
+
+    - name: ASSOCIATE INTERFACES WITH OSPF PROCESS
+      nxos_interface_ospf:
+        interface: "{{ item.interface }}"
+        ospf: 1
+        area: 1
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ default_vrf_interfaces }}"
+
+
+    - name: ENABLE NV OVERLAY EVPN
+      nxos_evpn_global:
+        nv_overlay_evpn: true
+        provider: "{{ nxos_provider }}"
+
+    - name: ENSURE BGP ASN EXISTS
+      nxos_bgp:
+        asn: "{{ asn }}"
+        router_id: "{{ router_id }}"
+        provider: "{{ nxos_provider }}"
+        state: present
+
+    - name: BASE AF CONFIG
+      nxos_bgp_af:
+        asn: "{{ asn }}"
+        afi: "{{ item.afi }}"
+        safi: "{{ item.safi }}"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ address_families }}"
+
+
+    - name: BASE NEIGHBOR CONFIG
+      nxos_bgp_neighbor:
+        asn: "{{ asn }}"
+        neighbor: "{{ item.neighbor }}"
+        remote_as: "{{ item.remote_as }}"
+        update_source: "{{ item.update_source }}"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ bgp_neighbors }}"
+
+    - name: CONFIGURE IPV4 UNICAST ADDRESS FAMILY
+      nxos_bgp_neighbor_af:
+        asn: "{{ asn }}"
+        neighbor: "{{ item.neighbor }}"
+        afi: ipv4
+        safi: unicast
+        send_community: both
+        route_reflector_client: "true"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ bgp_neighbors }}"
+
+
+    - name: CONFIGURE L2VPN EVPN ADDRESS FAMILY
+      nxos_bgp_neighbor_af:
+        asn: "{{ asn }}"
+        neighbor: "{{ item.neighbor }}"
+        afi: l2vpn
+        safi: evpn
+        send_community: both
+        route_reflector_client: "true"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ bgp_neighbors }}"
+
+

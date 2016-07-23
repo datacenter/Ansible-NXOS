@@ -1,0 +1,12 @@
+---
+
+router_id: 2.2.2.2
+
+interfaces:
+  - { interface: Ethernet2/1, addr: 10.10.10.4, mask: 31 }
+  - { interface: Ethernet2/2, addr: 10.10.10.6, mask: 31 }
+
+loopbacks:
+  - { interface: loopback0, addr: 2.2.2.2, mask: 32 }
+
+

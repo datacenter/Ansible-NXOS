@@ -1,0 +1,11 @@
+---
+asn: 65001
+router_id: 3.3.3.3
+
+interfaces:
+  - { interface: Ethernet1/1, addr: 10.10.10.1, mask: 31 }
+  - { interface: Ethernet1/2, addr: 10.10.10.5, mask: 31 }
+
+loopbacks:
+  - { interface: loopback0, addr: 3.3.3.3, mask: 32 }
+

@@ -1,0 +1,12 @@
+[all:vars]
+ansible_connection = local
+un=admin
+pwd=Insieme123
+
+[spine]
+n9k1
+n9k2
+
+[leaf]
+leaf-1
+leaf-2

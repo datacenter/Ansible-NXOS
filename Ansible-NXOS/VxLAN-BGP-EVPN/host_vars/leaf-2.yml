@@ -1,0 +1,12 @@
+---
+asn: 65001
+router_id: 4.4.4.4
+
+interfaces:
+  - { interface: Ethernet1/1, addr: 10.10.10.3, mask: 31 }
+  - { interface: Ethernet1/2, addr: 10.10.10.7, mask: 31 }
+
+loopbacks:
+  - { interface: loopback0, addr: 4.4.4.4, mask: 32 }
+
+
