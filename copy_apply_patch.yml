@@ -1,0 +1,23 @@
+---
+
+- name: Perform SMU on Cisco NX-OS
+  hosts: spine
+  connection: local
+  gather_facts: no
+
+  tasks:
+  - name: copy package to the device
+    nxos_file_copy:
+      local_file: "/etc/scp_server/nxos.CSCuz65185-n9k_EOR-1.0.0-7.0.3.I2.2d.lib32_n9000.rpm"
+      username: "{{ un }}"
+      password: "{{ pwd }}"
+      host: "{{ inventory_hostname }}"
+      transport: nxapi
+      
+  - name: perform smu
+    nxos_smu:
+      pkg: "nxos.CSCuz65185-n9k_EOR-1.0.0-7.0.3.I2.2d.lib32_n9000.rpm"
+      username: "{{ un }}"
+      password: "{{ pwd }}"
+      host: "{{ inventory_hostname }}"
+      transport: nxapi
