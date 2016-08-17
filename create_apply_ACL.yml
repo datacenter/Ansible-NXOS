@@ -1,0 +1,22 @@
+---
+
+- name: Create ACL and apply to an eth1/1
+  hosts: leaf
+
+  tasks:
+  
+    #############################################################
+    # Create ACL
+    #############################################################
+    - name: Create ACL 
+      nxos_acl: name=deny-all seq=10 action=deny proto=ip src=11.11.11.0/24 dest=12.12.12.0/24 host={{ inventory_hostname }} 
+    
+    - name: Add sequence 20
+      nxos_acl: name=deny-all seq=20 action=permit proto=ip src=11.11.11.0/24 dest=any host={{ inventory_hostname }}
+    
+    #############################################################
+    # APPLY ACL TO AN INTERFACE
+    #############################################################
+
+    - name: apply ACL ON SVI 11
+      nxos_acl_interface: name=deny-all interface=eth1/1 direction=ingress state=present host={{ inventory_hostname }}
