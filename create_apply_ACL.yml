@@ -1,6 +1,6 @@
 ---
 
-- name: Create ACL and apply to an eth1/1
+- name: Create ACL and apply to eth1/1
   hosts: leaf
 
   tasks:
