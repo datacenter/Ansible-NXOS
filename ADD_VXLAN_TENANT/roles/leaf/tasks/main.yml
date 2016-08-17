@@ -1,0 +1,168 @@
+
+    - name: CREATE VLAN 
+      nxos_vlan:
+        vlan_id: "{{ item.vlan_id }}"
+        mapped_vni: "{{ vni }}"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ vlans }}"
+
+
+    - name: ENSURE PORT IS LAYER 2 
+      nxos_interface:
+        interface: "{{ item.interface }}"
+        mode: layer2
+        admin_state: up
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ switchports }}"
+
+    
+
+    - name: ASSIGN VLAN TO PORT
+      nxos_switchport:
+        interface: "{{ item.interface }}"
+        mode: access
+        access_vlan: "{{ item.vlan }}"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ switchports }}"
+
+    - name: CREATE VLAN AND ASSOCIATE THE VLAN TO VNI
+      nxos_vlan:
+        vlan_id: "{{ vlan_id }}"
+        mapped_vni: "{{ vni }}"
+        provider: "{{ nxos_provider }}"
+
+    - name: CREATE VLAN AND ASSOCIATE THE VLAN TO VNI
+      nxos_vlan:
+        vlan_id: "{{ item.vlan_id }}"
+        mapped_vni: "{{ item.vni }}"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ vlans }}"
+
+    - name: CONFIGURE VTEP TO VNI 
+      nxos_vxlan_vtep_vni:
+        interface: nve1
+        vni: "{{ item.vni }}"
+        ingress_replication: bgp
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ vlans }}"
+
+
+    - name: CREATE SVI TO MAP TO VNI
+      nxos_interface:
+        interface: "{{ svi }}"
+        provider: "{{ nxos_provider }}"
+
+    - name: Create VRF and providing mapping to VXLAN (cont'd)
+      nxos_vrf_af:
+        vrf: "{{ vrf }}"
+        afi: ipv4
+        safi: unicast
+        route_target_both_auto_evpn: true
+        state: present
+        m_facts: true
+        provider: "{{ nxos_provider }}"
+
+
+    - name: CONFIGURE VTEP TO VNI 
+      nxos_vxlan_vtep_vni:
+        interface: nve1
+        vni: "{{ svi }}"
+        assoc_vrf: "true"
+        provider: "{{ nxos_provider }}"
+
+
+    - name: CREATE VRF TENANT-1
+      nxos_vrf:
+        vrf: "{{ vrf }}"
+        vni: "{{ vni }}"
+        rd: auto
+        state: present
+        provider: "{{ nxos_provider }}"
+
+    
+
+    - name: ASIGN INTERFACE TO VRF
+      nxos_vrf_interface:
+        vrf: "{{ vrf }}"
+        interface: "{{ svi }}"
+        provider: "{{ nxos_provider }}"
+
+
+    - name: ASIGN INTERFACE TO VRF
+      nxos_vrf_interface:
+        vrf: "{{ vrf }}"
+        interface: "{{ item.interface }}"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ vlan_ip }}"
+
+
+
+    - name: CREATE SVI
+      nxos_interface:
+        interface: "{{ item.interface }}"
+        fabric_forwarding_anycast_gateway: true
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ vlan_ip }}"
+
+
+    - name: ASSIGN IP ADDRESS TO SVI
+      nxos_ip_interface:
+        interface: "{{ item.interface }}"
+        addr: "{{ item.addr }}"
+        mask: "{{ item.mask }}"
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ vlan_ip }}"
+
+
+    - name: ENABLE IP FORWARD UNDER SVI
+      nxos_interface:
+        interface: "{{ svi }}"
+        ip_forward: enable
+        provider: "{{ nxos_provider }}"
+
+
+    - name: CREATE VXLAN VTEP
+      nxos_interface: 
+        interface: nve1
+        state: present
+        admin_state: up
+        provider: "{{ nxos_provider }}"
+
+    - name: CONFIGURE VTEP
+      nxos_vxlan_vtep:
+        interface: nve1
+        description: "VTEP 1"
+        host_reachability: "true"
+        source_interface: Loopback0
+        provider: "{{ nxos_provider }}"
+
+
+    - name: Add L3 VNI associated with tenant VRF to Overlay (cont'd)
+      nxos_vxlan_vtep_vni:
+        interface: nve1
+        vni: "{{ vni }}"
+        assoc_vrf: true
+        provider: "{{ nxos_provider }}"
+      register: data
+
+
+
+    - name: EVPN CONFIG
+      nxos_evpn_vni:
+        vni: "{{ item.vni }}"
+        route_distinguisher: auto
+        route_target_both: auto
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ vlans }}"
+
+    - name: BASE AF CONFIG
+      nxos_bgp_af:
+        asn: "{{ asn }}"
+        vrf: "{{ vrf }}"
+        afi: "{{ item.afi }}"
+        safi: "{{ item.safi }}"
+        advertise_l2vpn_evpn: "true"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ address_families }}"
+
