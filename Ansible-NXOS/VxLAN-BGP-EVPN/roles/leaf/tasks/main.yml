@@ -39,15 +39,16 @@
       - "{{ interfaces }}"
       - "{{ loopbacks }}"
 
-    - name: ASSIGN ANYCAST GATEWAY 
-      nxos_overlay_global:
-        anycast_gateway_mac: CAFE.CAFE.CAFE
-        provider: "{{ nxos_provider }}"
-
 
     - name: ENABLE NV OVERLAY EVPN
       nxos_evpn_global:
         nv_overlay_evpn: true
+        provider: "{{ nxos_provider }}"
+        
+        
+    - name: ASSIGN ANYCAST GATEWAY 
+      nxos_overlay_global:
+        anycast_gateway_mac: CAFE.CAFE.CAFE
         provider: "{{ nxos_provider }}"
 
 
