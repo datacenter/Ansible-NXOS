@@ -1,0 +1,43 @@
+---
+
+- hosts: spine
+  vars:
+    nxos_provider:
+      username: "{{ un }}"
+      password: "{{ pwd }}"
+      transport: nxapi
+      host: "{{ inventory_hostname }}"
+
+  tasks:
+    - name: Enable feature tacacs
+      nxos_feature:
+        feature: tacacs
+        provider: "{{ nxos_provider }}"
+        state: enabled
+
+    - name: AAA Server Global Key
+      nxos_aaa_server:
+        server_type: tacacs
+        encrypt_type: '7'
+        global_key: test_key
+        provider: "{{ nxos_provider }}"
+
+      
+
+    - name: Tacacs Server Host Configuration
+      nxos_aaa_server_host:
+        state: present
+        server_type: tacacs 
+        tacacs_port: 89
+        host_timeout: 10
+        address: 5.6.7.8
+        key: qwerty
+        provider: "{{ nxos_provider }}"
+
+      
+
+
+
+
+
+   
