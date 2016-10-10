@@ -1,0 +1,158 @@
+---
+
+- hosts: XYZ
+  vars:
+    nxos_provider:
+      username: "{{ un }}"
+      password: "{{ pwd }}"
+      transport: nxapi
+      host: "{{ inventory_hostname }}"
+
+  tasks:
+    - name: ENABLE NECESSARY FEATURES
+      nxos_feature:
+        feature: "{{item.feature }}"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ features }}"
+
+
+    - name: ENSURE PORT IS LAYER 2 
+      nxos_interface:
+        interface: "{{ item.interface }}"
+        mode: layer2
+        admin_state: up
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ port_profile_interfaces }}"
+
+    - name: CHANGE PORT TO L3 PORT
+      nxos_interface:
+        interface: "{{item.interface }}"
+        mode: layer3
+        admin_state: up
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ interfaces }}"
+
+    - name: CREATE VLANS
+      nxos_vlan:
+        vlan_range: "{{ item.vlan_range }}"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ vlans }}"
+
+    - name: Create ACL 
+      nxos_acl: 
+        name: "{{ item.name }}" 
+        seq: "{{ item.seq }}" 
+        action: "{{ item.action }}" 
+        proto: "{{ item.proto }}" 
+        src: "{{ item.src }}" 
+        dest: "{{ item.dest }}" 
+        host: "{{ inventory_hostname }}"
+      with_items: "{{ acls }}"
+
+
+    - name: DEFINE TRUNK PORT PROFILES
+      nxos_config:
+        lines: 
+        - 'description {{ item.description }}'
+        - 'switchport mode {{ item.mode }}'
+        - 'switchport trunk allowed vlan {{ item.trunk_vlans }}'
+        - 'switchport trunk native vlan {{ item.native_vlan }}'
+        - 'ip access-group {{ item.acl }} in'
+        - 'state enabled'
+        parents: 'port-profile {{ item.name }}'
+        match: exact
+        force: true
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ trunk_port_profiles }}"
+
+    - name: DEFINE ACCESS PORT PROFILES
+      nxos_config:
+        lines: 
+        - 'description {{ item.description }}'
+        - 'switchport mode {{ item.mode }}'
+        - 'switchport access vlan {{ item.access_vlan }}'
+        - 'ip access-group {{ item.acl }} in'
+        - 'state enabled'
+        parents: 'port-profile {{ item.name }}'
+        match: exact
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ access_port_profiles }}"
+
+    - name: ASSIGN PORT PROFILES
+      nxos_config:
+        lines: 
+        - 'interface {{ item.interface }}'
+        - 'inherit port-profile {{ item.name }}'
+        match: exact
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ port_profile_interfaces }}"
+      
+
+    - name: CREATE LOOPBACK
+      nxos_interface:
+        interface: "{{ item.interface }}"
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ loopbacks }}"
+
+    - name: IP ADDR
+      nxos_ip_interface:
+        interface: "{{ item.interface }}"
+        addr: "{{ item.addr }}"
+        mask: "{{ item.mask }}"
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ interfaces }}"
+      - "{{ loopbacks }}"
+
+    - name: TACACS SERVER HOST CONFIGURATION
+      nxos_aaa_server_host:
+        state: present
+        server_type: tacacs 
+        address: "{{ item.server }}"
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ tacacs }}"
+
+    - name: TACACS SOURCE INT CONFIGURATION
+      nxos_config:
+        lines: ['ip tacacs source-interface loopback0']
+        force: yes
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ name_servers }}"
+
+    - name: AAA SERVER GLOBAL KEY
+      nxos_aaa_server:
+        server_type: tacacs
+        encrypt_type: '7'
+        global_key: test_key
+        provider: "{{ nxos_provider }}"
+
+    - name: AAA GROUP SERVER CONFIGURATION
+      nxos_config:
+        lines: ['server {{ item.server }}']
+        match: exact
+        parents: ['aaa group server tacacs+ tacacs']
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ tacacs }}"
+
+    - name: SET DOMAIN NAME
+      nxos_config:
+        lines: ['ip domain-name internal.XYZ.com']
+        force: yes
+        provider: "{{ nxos_provider }}"
+
+    - name: DNS SERVER HOST CONFIGURATION
+      nxos_config:
+        lines: ['ip name-server {{ item.server }}']
+        force: yes
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ name_servers }}"
+

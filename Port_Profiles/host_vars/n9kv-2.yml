@@ -1,0 +1,13 @@
+---
+
+port_profile_interfaces:
+  - { name: docker, interface: eth1/1}
+  - { name: esxi,interface: eth1/2 }
+  - { name: hyperv,interface: eth1/3 }
+  - { name: kvm,interface: eth1/4 }
+  
+interfaces:
+  - { interface: Ethernet1/9, addr: 10.10.20.11, mask: 31 }
+
+loopbacks:
+  - { interface: loopback0, addr: 1.1.1.1, mask: 32 }
