@@ -1,0 +1,47 @@
+---
+
+- hosts: spine
+  vars:
+    nxos_provider:
+      username: "{{ un }}"
+      password: "{{ pwd }}"
+      transport: nxapi
+      host: "{{ inventory_hostname }}"
+
+  tasks:
+    - name: ENABLE FEATURE SCHEDULER
+      nxos_feature:
+        feature: scheduler
+        provider: "{{ nxos_provider }}"
+        state: enabled
+
+    - name: COPY SCRIPT TO THE DEVICE
+      nxos_file_copy:
+        local_file: "/etc/scp_server/MyMonitorScript.py"
+        provider: "{{ nxos_provider }}"
+
+    - name: CREATE JOB
+      nxos_config:
+        lines: 
+        - 'scheduler job name run_monitor_script'
+        - 'python MyMonitorScript.py'
+        match: exact
+        force: true
+        provider: "{{ nxos_provider }}"
+
+    - name: SCHEDULE JOB TO RUN DAILY AT 1AM
+      nxos_config:
+        lines: 
+        - 'scheduler schedule name daily'
+        - 'job name run_monitor_script'
+        - 'time daily 1:00'
+        match: exact
+        force: true
+        provider: "{{ nxos_provider }}"
+      
+
+
+
+
+
+   
