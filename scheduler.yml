@@ -29,12 +29,12 @@
         force: true
         provider: "{{ nxos_provider }}"
 
-    - name: SCHEDULE JOB TO RUN DAILY AT 1AM
+    - name: SCHEDULE JOB TO EVERY 5 MINUTES
       nxos_config:
         lines: 
         - 'scheduler schedule name daily'
         - 'job name run_monitor_script'
-        - 'time daily 1:00'
+        - 'time start now repeat 5'
         match: exact
         force: true
         provider: "{{ nxos_provider }}"
