@@ -1,0 +1,78 @@
+---
+
+- hosts: n9k1
+  vars:
+    nxos_provider:
+      username: "{{ un }}"
+      password: "{{ pwd }}"
+      transport: nxapi
+      host: "{{ inventory_hostname }}"
+
+  tasks:
+    - name: ENABLE NECESSARY FEATURES
+      nxos_feature:
+        feature: "{{ item }}"
+        provider: "{{ nxos_provider }}"
+      with_items:
+      - "ospf"
+      - "bgp"
+      - "interface-vlan"
+
+
+    - name: ENSURE PORT IS LAYER 2 
+      nxos_interface:
+        interface: "{{ item }}"
+        mode: layer2
+        admin_state: up
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "Eth1/1"
+      - "Eth1/2"
+      - "Eth1/3"
+
+    - name: CHANGE PORT TO L3 PORT
+      nxos_interface:
+        interface: "{{item }}"
+        mode: layer3
+        admin_state: up
+        provider: "{{ nxos_provider }}"
+      with_items:
+      - "Eth1/47"
+      - "Eth1/48"
+
+    - name: CREATE VLANS
+      nxos_vlan:
+        vlan_id: "{{ item }}"
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - 2
+      - 5
+      - 10
+
+    - name: CREATE VLAN RANGE
+      nxos_vlan:
+        vlan_range: "{{ item }}"
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - 200-250
+
+    - name: ASSIGN VLAN TO PORT
+      nxos_switchport:
+        interface: "{{ item.interface }}"
+        mode: access
+        access_vlan: "{{ item.vlan }}"
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - { interface: Ethernet1/1, vlan: 5 }
+      - { interface: Ethernet1/2, vlan: 10 }
+      - { interface: Ethernet1/2, vlan: 200 }
+
+    - name: IP ADDR
+      nxos_ip_interface:
+        interface: "{{ item.interface }}"
+        addr: "{{ item.addr }}"
+        mask: "{{ item.mask }}"
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - { interface: Ethernet1/47, addr: 10.10.10.1, mask: 31 }
+      - { interface: Ethernet1/48, addr: 10.10.10.5, mask: 31 }
