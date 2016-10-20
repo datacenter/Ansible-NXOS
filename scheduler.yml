@@ -29,7 +29,7 @@
         force: true
         provider: "{{ nxos_provider }}"
 
-    - name: SCHEDULE JOB TO EVERY 5 MINUTES
+    - name: SCHEDULE JOB TO RUN EVERY 5 MINUTES
       nxos_config:
         lines: 
         - 'scheduler schedule name daily'
