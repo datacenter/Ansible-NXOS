@@ -1,0 +1,38 @@
+---
+
+- name: vlan provisioning
+  hosts: n9kv-1
+  connection: local
+  gather_facts: no
+
+  vars:
+    nxos_provider:
+      username: "{{ un }}"
+      password: "{{ pwd }}"
+      transport: nxapi
+      host: "{{ inventory_hostname }}"
+
+  tasks:
+
+    - name: ENSURE VLAN EXISTS. CREATE USING RANGE
+      nxos_vlan: 
+        vlan_range: 10-13 
+        state: present 
+        provider: "{{ nxos_provider }}"
+
+    - name: CREATE VLANS AND ASSIGN A NAME, USING VLAN_ID
+      nxos_vlan: 
+        vlan_id: "{{ item.vlan_id }}"
+        name: "{{ item.name }} "
+        provider: "{{ nxos_provider }}"
+      with_items:
+        - vlan_id: 2
+          name: native
+        - vlan_id: 15
+          name: web
+        - vlan_id: 20
+          name: app
+        - vlan_id: 30
+          name: db 
+        - vlan_id: 40
+          name: misc
