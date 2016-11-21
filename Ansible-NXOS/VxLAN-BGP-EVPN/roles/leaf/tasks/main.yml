@@ -25,7 +25,7 @@
         mtu: 9126
         interface: "{{ item.interface }}"
         state: present
-        host: "{{ inventory_hostname }}"
+        provider: "{{ nxos_provider }}"
       with_items: "{{ interfaces }}"
 
 
