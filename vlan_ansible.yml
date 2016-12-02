@@ -1,0 +1,14 @@
+---
+
+- name: vlan testing
+  hosts: n9kvswitchfcs
+
+  tasks:
+    - name: config VLANs names for a few VLANs
+      nxos_vlan: vlan_id={{ item.vid }} name={{ item.name }} host={{ inventory_hostname }} state=present
+      with_items:
+        - { vid: 10, name: web }
+        - { vid: 20, name: app }
+
+    - name: ensure VLAN 30 exists with the name WEB and is in the shutdown state
+      nxos_vlan: vlan_id=30 host={{ inventory_hostname }} admin_state=down name=WEB

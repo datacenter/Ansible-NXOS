@@ -1,0 +1,23 @@
+---
+  - name: snmp configuration
+    hosts: n9kvswitchfcs
+    connection: local
+    gather_facts: no
+
+    tasks:
+
+      - name: create snmp community with group
+        nxos_snmp_community: community=test group="network-operator" host={{ inventory_hostname }}
+        register: data
+
+      - name: delete snmp community with group
+        nxos_snmp_community: community=test group="network-operator" state=absent host={{ inventory_hostname }}
+        register: data
+
+      - name: create snmp user with auth parameters
+        nxos_snmp_user: user=user1 group="network-operator" auth=md5 pwd=cisco123 privacy=cisco321 host={{ inventory_hostname }}
+        register: data
+
+      - name: delete snmp user with auth parameters
+        nxos_snmp_user: user=user1 group="network-operator" auth=md5 pwd=cisco123 privacy=cisco321 state=absent host={{ inventory_hostname }}
+        register: data
