@@ -1,0 +1,284 @@
+
+
+    - name: CONFIGURE HOSTNAME
+      nxos_config:
+        lines: hostname {{ inventory_hostname }}
+        provider: "{{ nxos_provider }}"
+
+    - name: ENABLE FEATURES
+      nxos_feature:
+        feature: "{{item.feature }}"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ features }}"
+
+    - name: CONFIGURE PHYSICAL L3 INTERFACES
+      nxos_interface:
+        interface: "{{item.interface }}"
+        mode: layer3
+        admin_state: up
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ l3_interfaces }}"
+
+    - name: CONFIGURE LOOPBACK INTERFACES
+      nxos_interface:
+        interface: "{{ item.interface }}"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ loopbacks }}"
+
+    - name: CONFIGURE INTERFACE IP ADDR
+      nxos_ip_interface:
+        interface: "{{ item.interface }}"
+        addr: "{{ item.addr }}"
+        mask: "{{ item.mask }}"
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ loopbacks }}"
+
+    - name: CHANGE INTERFACE MTU TO 9216
+      nxos_mtu: 
+        mtu: 9216
+        interface: "{{ item.interface }}"
+        state: present
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ l3_interfaces }}"
+
+    - name: CONFIGURE INTERFACE IP UNNUMBERED
+      nxos_config:
+        lines: 
+          - medium p2p
+          - ip unnumbered loopback 0
+        parents:
+          - 'interface {{ item.interface }}'
+        provider: "{{ nxos_provider  }}"
+      with_items: "{{ l3_interfaces }}"
+
+    - name: CONFIGURE OSPF PROCESS ID AND AREA AND ROUTER ID
+      nxos_ospf_vrf:
+        ospf: "{{ ospf_process_id }}"
+        router_id: "{{ router_id }}"
+        provider: "{{ nxos_provider }}"
+
+    - name: ASSOCIATE INTERFACES WITH OSPF PROCESS
+      nxos_interface_ospf:
+        interface: "{{ item.interface }}"
+        ospf: "{{ ospf_process_id }}"
+        area: "{{ ospf_area }}"
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ l3_interfaces }}"
+      - "{{ loopbacks }}"
+
+    - name: CONFIGURE OSPF INTERFACES NETWORK P2P
+      nxos_config:
+        lines: ip ospf network point-to-point
+        parents:
+          - 'interface {{ item.interface }}'
+        provider: "{{ nxos_provider  }}"
+      with_items: "{{ l3_interfaces }}"
+
+    - name: CONFIGURE PIM RP
+      nxos_pim_rp_address:
+        rp_address: "{{ rp_address }}"
+        provider: "{{ nxos_provider }}"
+
+    - name: CONFIGURE PIM INTERFACES
+      nxos_pim_interface:
+        interface: "{{ item.interface }}"
+        sparse: true
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ l3_interfaces }}"
+
+    - name: ENABLE NV OVERLAY EVPN
+      nxos_evpn_global:
+        nv_overlay_evpn: true
+        provider: "{{ nxos_provider }}"
+
+    - name: CONFIGURE BGP ASN AND ROUTER ID
+      nxos_bgp:
+        asn: "{{ asn }}"
+        router_id: "{{ router_id }}"
+        provider: "{{ nxos_provider }}"
+        state: present
+
+    - name: CONFIGURE BGP NEIGHBORS
+      nxos_bgp_neighbor:
+        asn: "{{ asn }}"
+        neighbor: "{{ item.neighbor }}"
+        remote_as: "{{ item.remote_as }}"
+        update_source: "{{ item.update_source }}"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ bgp_neighbors }}"
+
+    - name: CONFIGURE L2VPN EVPN ADDRESS FAMILY FOR BGP NEIGHBORS
+      nxos_bgp_neighbor_af:
+        asn: "{{ asn }}"
+        neighbor: "{{ item.neighbor }}"
+        afi: l2vpn
+        safi: evpn
+        send_community: both
+        route_reflector_client: "false"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ bgp_neighbors }}"
+
+    - name: CONFIGURE VLAN TO VNI MAPPING
+      nxos_vlan:
+        vlan_id: "{{ item.vlan_id }}"
+        mapped_vni: "{{ item.vni_id }}"
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ vlans_l2vni }}"
+      - "{{ vlans_l3vni }}"
+
+    - name: CONFIGURE L2 INTERFACES/SWITCHPORTS
+      nxos_interface:
+        interface: "{{ item.interface }}"
+        mode: layer2
+        admin_state: up
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ l2_interfaces }}"
+
+    - name: CONFIGURE L2 INTERFACES/SWITCHPORTS (TRUNKS)
+      nxos_switchport:
+        interface: "{{ item.interface }}"
+        mode: trunk
+        trunk_vlans: 10-15,20-25,30-35,40-45,50-55
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ l2_interfaces }}"
+
+   # - name: CONFIGURE L2 INTERFACES/SWITCHPORTS (ACCESS)
+   #   nxos_switchport:
+   #     interface: "{{ item.interface }}"
+   #     mode: access
+   #     access_vlans: 11
+   #     provider: "{{ nxos_provider }}"
+   #   with_items: "{{ l2_interfaces }}"
+    
+    - name: CONFIGURE TENANT VRFs
+      nxos_vrf:
+        vrf: "{{ item.vrf }}"
+        vni: "{{ item.vni_id }}"
+        rd: auto
+        state: present
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ vrfs }}"
+
+    - name: CONFIGURE TENANT VRFs (cont'd)
+      nxos_vrf_af:
+        vrf: "{{ item.vrf }}"
+        afi: ipv4
+        safi: unicast
+        route_target_both_auto_evpn: true
+        state: present
+        m_facts: true
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ vrfs }}"
+
+    - name: CONFIGURE VXLAN VTEP NVE INTERFACE
+      nxos_interface: 
+        interface: nve1
+        state: present
+        admin_state: up
+        provider: "{{ nxos_provider }}"
+
+    - name: CONFIGURE VXLAN VTEP NVE INTERFACE FOR EVPN CONTROL PLANE
+      nxos_vxlan_vtep:
+        interface: nve1
+        host_reachability: "true"
+        source_interface: Loopback0
+        provider: "{{ nxos_provider }}"
+
+    - name: CONFIGURE VXLAN VTEP NVE INTERFACE L2VNI MAPPING
+      nxos_vxlan_vtep_vni:
+        interface: nve1
+        vni: "{{ item.vni_id }}"
+        #ingress_replication: bgp
+        multicast_group: "{{ item.mcast_grp }}"
+        suppress_arp: true
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ vlans_l2vni }}"
+
+    - name: CONFIGURE VXLAN VTEP NVE INTERFACE L3VNI MAPPING
+      nxos_vxlan_vtep_vni:
+        interface: nve1
+        vni: "{{ item.vni_id }}"
+        assoc_vrf: "true"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ vlans_l3vni }}"
+
+    #- name: ENABLE VXLAN VTEP NVE INTERFACE
+    #  nxos_interface:
+    #    interface: nve1
+    #    state: present
+    #    admin_state: up
+    #    provider: "{{ nxos_provider }}"
+
+    - name: CONFIGURE L2 EVPN VRFs
+      nxos_evpn_vni:
+        vni: "{{ item.vni_id }}"
+        route_distinguisher: auto
+        route_target_both: auto
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ vlans_l2vni }}"
+
+    - name: CONFIGURE TENANT VRFs UNDER BGP PROCESS
+      nxos_bgp_af:
+        asn: "{{ asn }}"
+        vrf: "{{ item.vrf }}"
+        afi: "{{ item.afi }}"
+        safi: "{{ item.safi }}"
+        advertise_l2vpn_evpn: "true"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ vrfs }}"
+
+    - name: CONFIGURE ANYCAST GW MAC
+      nxos_config:
+        lines: fabric forwarding anycast-gateway-mac 1234.5678.9000
+        provider: "{{ nxos_provider  }}"
+      with_items: "{{ l3_interfaces }}"        
+
+    - name: CONFIGURE SVIs THAT ARE MAPPED TO VNIs
+      nxos_interface:
+        interface: "vlan{{ item.vlan_id }}"
+        admin_state: up
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ vlans_l2vni }}"
+      - "{{ vlans_l3vni }}"
+
+    - name: ASSOCIATE INTERFACES TO TENANT VRF
+      nxos_vrf_interface:
+        vrf: "{{ item.vrf }}"
+        interface: "vlan{{ item.vlan_id }}"
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ vlans_l2vni }}"
+      - "{{ vlans_l3vni }}"
+
+    - name: ENABLE ANYCAST GW UNDER L2VNI SVI
+      nxos_interface:
+        interface: "vlan{{ item.vlan_id }}"
+        fabric_forwarding_anycast_gateway: true
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ vlans_l2vni }}"
+
+    - name: CONFIGURE IP FORWARD UNDER L3VNI SVI
+      nxos_interface:
+        interface: "vlan{{ item.vlan_id }}"
+        ip_forward: enable
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ vlans_l3vni }}"
+
+    - name: CONFIGURE IP ADDRESS TO L2VNI SVI
+      nxos_ip_interface:
+        interface: "vlan{{ item.vlan_id }}"
+        addr: "{{ item.addr }}"
+        mask: "{{ item.mask }}"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ vlans_l2vni }}"
+
+    - name: SAVE RUN CONFIG TO STARTUP CONFIG
+      nxos_config:
+        save: yes
+        provider: "{{ nxos_provider }}"
+
+

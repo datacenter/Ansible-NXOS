@@ -1,0 +1,7 @@
+---
+
+router_id: 10.2.1.2
+
+loopbacks:
+  - { interface: loopback0, addr: 10.2.1.2, mask: 32 }
+  - { interface: loopback1, addr: 100.2.1.1, mask: 32 }

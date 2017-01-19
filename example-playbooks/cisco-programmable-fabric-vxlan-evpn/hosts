@@ -1,0 +1,14 @@
+[all:vars]
+ansible_connection = local
+user = admin
+pwd = cisco.123
+
+[spine]
+mt-s1
+mt-s2
+
+[leaf]
+mt-l1
+mt-l2
+mt-l3
+mt-l4
