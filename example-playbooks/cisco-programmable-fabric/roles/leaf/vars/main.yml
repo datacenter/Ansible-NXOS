@@ -1,0 +1,84 @@
+---
+
+  nxos_provider:
+    username: "{{ user }}"
+    password: "{{ pwd }}"
+    transport: nxapi
+    host: "{{ inventory_hostname }}"
+
+
+  features:
+  - { feature: bgp }
+  - { feature: ospf }
+  - { feature: "nv overlay" }
+  - { feature: pim }
+  - { feature: interface-vlan }
+  - { feature: vnseg_vlan }
+
+  l3_interfaces:
+  - { interface: Ethernet1/49 }
+  - { interface: Ethernet1/50 }
+  - { interface: Ethernet1/51 }
+  - { interface: Ethernet1/52 }
+ 
+  l2_interfaces:
+  - { interface: Ethernet1/1 }
+  - { interface: Ethernet1/2 }
+ 
+  ospf_process_id: Underlay
+
+  ospf_area: 0
+  
+  asn: 65001
+
+  address_families:
+  - { afi: l2vpn, safi: evpn }
+  - { afi: ipv4, safi: unicast }
+  
+  bgp_neighbors:
+  - { remote_as: 65001, neighbor: 10.2.1.1, update_source: Loopback0 }
+  - { remote_as: 65001, neighbor: 10.2.1.2, update_source: Loopback0 }
+
+  rp_address: 100.2.1.1
+
+  vlans_l2vni:
+  - { vlan_id: 11, vni_id: 10011, addr: 10.0.11.1, mask: 24, mcast_grp: 239.0.0.11, vrf: Tenant-1 }
+  - { vlan_id: 12, vni_id: 10012, addr: 10.0.12.1, mask: 24, mcast_grp: 239.0.0.12, vrf: Tenant-1 }
+  - { vlan_id: 13, vni_id: 10013, addr: 10.0.13.1, mask: 24, mcast_grp: 239.0.0.13, vrf: Tenant-1 }
+  - { vlan_id: 14, vni_id: 10014, addr: 10.0.14.1, mask: 24, mcast_grp: 239.0.0.14, vrf: Tenant-1 }
+  - { vlan_id: 15, vni_id: 10015, addr: 10.0.15.1, mask: 24, mcast_grp: 239.0.0.15, vrf: Tenant-1 }
+  - { vlan_id: 21, vni_id: 20021, addr: 10.0.21.1, mask: 24, mcast_grp: 239.0.0.21, vrf: Tenant-2 }
+  - { vlan_id: 22, vni_id: 20022, addr: 10.0.22.1, mask: 24, mcast_grp: 239.0.0.22, vrf: Tenant-2 }
+  - { vlan_id: 23, vni_id: 20023, addr: 10.0.23.1, mask: 24, mcast_grp: 239.0.0.23, vrf: Tenant-2 }
+  - { vlan_id: 24, vni_id: 20024, addr: 10.0.24.1, mask: 24, mcast_grp: 239.0.0.24, vrf: Tenant-2 }
+  - { vlan_id: 25, vni_id: 20025, addr: 10.0.25.1, mask: 24, mcast_grp: 239.0.0.25, vrf: Tenant-2 }
+  - { vlan_id: 31, vni_id: 30031, addr: 10.0.31.1, mask: 24, mcast_grp: 239.0.0.31, vrf: Tenant-3 }
+  - { vlan_id: 32, vni_id: 30032, addr: 10.0.32.1, mask: 24, mcast_grp: 239.0.0.32, vrf: Tenant-3 }
+  - { vlan_id: 33, vni_id: 30033, addr: 10.0.33.1, mask: 24, mcast_grp: 239.0.0.33, vrf: Tenant-3 }
+  - { vlan_id: 34, vni_id: 30034, addr: 10.0.34.1, mask: 24, mcast_grp: 239.0.0.34, vrf: Tenant-3 }
+  - { vlan_id: 35, vni_id: 30035, addr: 10.0.35.1, mask: 24, mcast_grp: 239.0.0.35, vrf: Tenant-3 }
+  - { vlan_id: 41, vni_id: 40041, addr: 10.0.41.1, mask: 24, mcast_grp: 239.0.0.41, vrf: Tenant-4 }
+  - { vlan_id: 42, vni_id: 40042, addr: 10.0.42.1, mask: 24, mcast_grp: 239.0.0.42, vrf: Tenant-4 }
+  - { vlan_id: 43, vni_id: 40043, addr: 10.0.43.1, mask: 24, mcast_grp: 239.0.0.43, vrf: Tenant-4 }
+  - { vlan_id: 44, vni_id: 40044, addr: 10.0.44.1, mask: 24, mcast_grp: 239.0.0.44, vrf: Tenant-4 }
+  - { vlan_id: 45, vni_id: 40045, addr: 10.0.45.1, mask: 24, mcast_grp: 239.0.0.45, vrf: Tenant-4 }
+  - { vlan_id: 51, vni_id: 50051, addr: 10.0.51.1, mask: 24, mcast_grp: 239.0.0.51, vrf: Tenant-5 }
+  - { vlan_id: 52, vni_id: 50052, addr: 10.0.52.1, mask: 24, mcast_grp: 239.0.0.52, vrf: Tenant-5 }
+  - { vlan_id: 53, vni_id: 50053, addr: 10.0.53.1, mask: 24, mcast_grp: 239.0.0.53, vrf: Tenant-5 }
+  - { vlan_id: 54, vni_id: 50054, addr: 10.0.54.1, mask: 24, mcast_grp: 239.0.0.54, vrf: Tenant-5 }
+  - { vlan_id: 55, vni_id: 50055, addr: 10.0.55.1, mask: 24, mcast_grp: 239.0.0.55, vrf: Tenant-5 }
+
+  vlans_l3vni:
+  - { vlan_id: 10, vni_id: 10000, vrf: Tenant-1 }
+  - { vlan_id: 20, vni_id: 20000, vrf: Tenant-2 }
+  - { vlan_id: 30, vni_id: 30000, vrf: Tenant-3 }
+  - { vlan_id: 40, vni_id: 40000, vrf: Tenant-4 }
+  - { vlan_id: 50, vni_id: 50000, vrf: Tenant-5 }
+
+  vrfs:
+  - { vrf: Tenant-1, vni_id: 10000, afi: ipv4, safi: unicast }
+  - { vrf: Tenant-2, vni_id: 20000, afi: ipv4, safi: unicast }
+  - { vrf: Tenant-3, vni_id: 30000, afi: ipv4, safi: unicast }
+  - { vrf: Tenant-4, vni_id: 40000, afi: ipv4, safi: unicast }
+  - { vrf: Tenant-5, vni_id: 50000, afi: ipv4, safi: unicast }
+

@@ -1,0 +1,134 @@
+
+
+    - name: CONFIGURE HOSTNAME
+      nxos_config:
+        lines: hostname {{ inventory_hostname }}
+        provider: "{{ nxos_provider }}"
+
+    - name: ENABLE FEATURES
+      nxos_feature:
+        feature: "{{item.feature }}"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ features }}"
+
+    - name: CONFIGURE PHYSICAL L3 INTERFACES
+      nxos_interface:
+        interface: "{{item.interface }}"
+        mode: layer3
+        admin_state: up
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ l3_interfaces }}"
+
+    - name: CONFIGURE LOOPBACK INTERFACES
+      nxos_interface:
+        interface: "{{ item.interface }}"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ loopbacks }}"
+
+    - name: CONFIGURE INTERFACE IP ADDR
+      nxos_ip_interface:
+        interface: "{{ item.interface }}"
+        addr: "{{ item.addr }}"
+        mask: "{{ item.mask }}"
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ loopbacks }}"
+
+    - name: CHANGE INTERFACE MTU TO 9216
+      nxos_mtu: 
+        mtu: 9216
+        interface: "{{ item.interface }}"
+        state: present
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ l3_interfaces }}"
+
+    - name: CONFIGURE INTERFACE IP UNNUMBERED
+      nxos_config:
+        lines: 
+          - medium p2p
+          - ip unnumbered loopback 0
+        parents:
+          - 'interface {{ item.interface }}'
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ l3_interfaces }}"
+
+    - name: CONFIGURE OSPF PROCESS ID AND AREA AND ROUTER ID
+      nxos_ospf_vrf:
+        ospf: "{{ ospf_process_id }}"
+        router_id: "{{ router_id }}"
+        provider: "{{ nxos_provider }}"
+
+    - name: ASSOCIATE INTERFACES WITH OSPF PROCESS
+      nxos_interface_ospf:
+        interface: "{{ item.interface }}"
+        ospf: "{{ ospf_process_id }}"
+        area: "{{ ospf_area }}"
+        provider: "{{ nxos_provider }}"
+      with_items: 
+      - "{{ l3_interfaces }}"
+      - "{{ loopbacks }}"
+
+    - name: CONFIGURE OSPF INTERFACES NETWORK P2P
+      nxos_config:
+        lines: ip ospf network point-to-point
+        parents:
+          - 'interface {{ item.interface }}'
+        provider: "{{ nxos_provider  }}"
+      with_items: "{{ l3_interfaces }}"
+
+    - name: CONFIGURE PIM ANYCAST RP
+      nxos_config:
+        lines:
+          - "ip pim anycast-rp {{ rp_address }} {{ s1_loopback }}"
+          - "ip pim anycast-rp {{ rp_address }} {{ s2_loopback }}"
+        provider: "{{ nxos_provider }}"
+
+    - name: CONFIGURE PIM RP
+      nxos_pim_rp_address:
+        rp_address: "{{ rp_address }}"
+
+    - name: CONFIGURE PIM INTERFACES
+      nxos_pim_interface:
+        interface: "{{ item.interface }}"
+        sparse: true
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ l3_interfaces }}"
+
+    - name: ENABLE NV OVERLAY EVPN
+      nxos_evpn_global:
+        nv_overlay_evpn: true
+        provider: "{{ nxos_provider }}"
+
+    - name: CONFIGURE BGP ASN AND ROUTER ID
+      nxos_bgp:
+        asn: "{{ asn }}"
+        router_id: "{{ router_id }}"
+        provider: "{{ nxos_provider }}"
+        state: present
+
+    - name: CONFIGURE BGP NEIGHBORS
+      nxos_bgp_neighbor:
+        asn: "{{ asn }}"
+        neighbor: "{{ item.neighbor }}"
+        remote_as: "{{ item.remote_as }}"
+        update_source: "{{ item.update_source }}"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ bgp_neighbors }}"
+
+    - name: CONFIGURE L2VPN EVPN ADDRESS FAMILY FOR BGP NEIGHBORS
+      nxos_bgp_neighbor_af:
+        asn: "{{ asn }}"
+        neighbor: "{{ item.neighbor }}"
+        afi: l2vpn
+        safi: evpn
+        send_community: both
+        route_reflector_client: "true"
+        provider: "{{ nxos_provider }}"
+      with_items: "{{ bgp_neighbors }}"
+
+    - name: SAVE RUN CONFIG TO STARTUP CONFIG
+      nxos_config:
+        save: yes
+        provider: "{{ nxos_provider }}"
+
+
