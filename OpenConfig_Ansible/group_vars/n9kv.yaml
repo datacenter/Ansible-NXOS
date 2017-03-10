@@ -1,0 +1,11 @@
+---
+
+RPMs:
+  - { rpm: mtx-infra-1.0.0-r1610291005.x86_64.rpm }
+  - { rpm: mtx-device-7_0_3_I5_1.1.0.0-r1610291005.x86_64.rpm }
+  - { rpm: mtx-netconf-agent-1.0.1-r1610291005.x86_64.rpm }
+  - { rpm: mtx-restconf-agent-1.0.1-r1610291005.x86_64.rpm }
+  - { rpm: mtx-openconfig-if-ip-7_0_3_I5_1.1.0.0-r1612010430.x86_64.rpm }
+  - { rpm: mtx-openconfig-interfaces-7_0_3_I5_1.1.0.0-r1612010435.x86_64.rpm }
+  - { rpm: mtx-openconfig-vlan-7_0_3_I5_1.1.0.0-r1612010425.x86_64.rpm }
+  - { rpm: mtx-infra-1.0.0-r1610291005.x86_64.rpm }

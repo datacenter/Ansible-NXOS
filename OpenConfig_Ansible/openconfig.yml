@@ -1,0 +1,53 @@
+---
+
+- name: Install OC Models and transport RPMs 
+  hosts: n9kv
+  connection: local
+
+  vars:
+    nxos_provider:
+      username: "{{ un }}"
+      password: "{{ pwd }}"
+      transport: nxapi
+      host: "{{ inventory_hostname }}"
+
+  tasks:
+  - name: Enable necessary features to install RPM
+    nxos_feature: 
+      feature: "{{ item }}"
+      state: enabled 
+      provider: "{{ nxos_provider }}"
+    with_items:
+      - 'bash-shell'
+      - 'scp-server'
+
+
+  - name: Copy RPM to the devices
+    nxos_file_copy:
+      local_file: "/etc/scp_server/{{ item.rpm }}" 
+      remote_file: "RPMs/{{ item.rpm }}"
+      provider: "{{ nxos_provider }}"
+    with_items: "{{ RPMs }}"
+
+  - name: Install RPM
+    ntc_config_command:
+      connection: ssh
+      platform: linux_ssh
+      commands:
+      - run bash
+      - sudo su
+      - yum install -y /bootflash/{{ item.rpm }}
+      provider: "{{ nxos_provider }}"
+    with_items: "{{ RPMs }}"
+
+  - name: Start RestCONF and NetCONF processes
+    ntc_config_command:
+      connection: ssh
+      platform: linux_ssh
+      commands:
+      - run bash
+      - sudo su
+      - restconfctl start
+      - netconfctl start
+      provider: "{{ nxos_provider }}"
+
