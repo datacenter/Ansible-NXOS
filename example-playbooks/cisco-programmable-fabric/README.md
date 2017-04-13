@@ -44,3 +44,6 @@ Pull directly from DockerHub:
 ```
 docker pull mtarking/cisco-programmable-fabric
 ```
+```
+docker run -it mtarking/cisco-programmable-fabric
+```
