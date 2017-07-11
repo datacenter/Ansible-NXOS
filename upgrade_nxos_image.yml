@@ -1,0 +1,53 @@
+---
+
+  - name: Upgrade NXOS version
+    hosts: N9Kv
+    connection: local
+    gather_facts: no
+
+    tasks:
+      - name: Copy Image to the Switch
+        nxos_file_copy:
+          local_file: "/etc/scp_server/nxos.7.0.3.I4.5.bin"
+          username: "{{ un }}"
+          password: "{{ pwd }}"
+          host: "{{ inventory_hostname }}"
+          transport: nxapi
+
+      - block:
+          - name: Install OS
+            nxos_install_os:
+              system_image_file: nxos.7.0.3.I4.5.bin
+              host: "{{ inventory_hostname }}"
+              username: "{{ un }}"
+              password: "{{ pwd }}"
+              transport: cli
+        rescue:
+          - name: Wait for device to perform all checks 
+            wait_for:
+              port: 22
+              state: stopped
+              timeout: 400
+              delay: 60
+              host: "{{ inventory_hostname }}"
+
+          - name: Wait for device to come back up
+            wait_for:
+              port: 22
+              state: started
+              timeout: 400
+              delay: 60
+              host: "{{ inventory_hostname }}"
+
+          - name: Check installed OS
+            nxos_command:
+              commands:
+                - show version
+              username: "{{ un }}"
+              password: "{{ pwd }}"
+              host: "{{ inventory_hostname }}"
+              transport: nxapi
+            register: output
+          - assert:
+              that:
+                - output['stdout'][0]['kickstart_ver_str'] == '7.0(3)I4(5)'
