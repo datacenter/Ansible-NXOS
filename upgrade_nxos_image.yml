@@ -1,7 +1,7 @@
 ---
 
   - name: Upgrade NXOS version
-    hosts: N9Kv
+    hosts: N9K-1
     connection: local
     gather_facts: no
 
