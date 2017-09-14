@@ -1,0 +1,80 @@
+---
+
+  - name: Upgrade NXOS version from 7.0(3)I5(1) to 7.0(3)I6(1)
+    hosts: leaves
+    connection: local
+    gather_facts: no
+
+    vars:
+      nxos_provider:
+        username: "{{ un }}"
+        password: "{{ pwd }}"
+        transport: nxapi
+        host: "{{ inventory_hostname }}"
+
+    tasks:
+
+      # - name: Show Hostname And Upgrade Devices ending in 'TOR-2'
+      #   nxos_command:
+      #     commands:
+      #       - show hostname
+      #     provider: "{{ nxos_provider }}"
+      #   register: output
+      # - name: Print Hostname
+      #   debug: msg="{{output['stdout'][0]['hostname']}}"
+      # - assert:
+      #     that:
+      #       - output['stdout'][0]['hostname'][-5:] == 'TOR-2'
+
+      - name: Show VPC And Upgrade The Secondary Switch
+        nxos_command:
+          commands:
+            - show vpc
+          provider: "{{ nxos_provider }}"
+        register: output
+      - name: Print VPC Role
+        debug: msg="{{output['stdout'][0]['vpc-role']}}"
+      - assert:
+          that:
+            - output['stdout'][0]['vpc-role'] == 'secondary'
+
+      - name: Now Upgrading The Switch
+        debug: msg="Upgrading Switch {{inventory_hostname}}"
+
+      - block:
+          - name: Install OS
+            nxos_install_os:
+              system_image_file: "{{ item.file_name }}"
+              provider: "{{ nxos_provider }}"
+            with_items:
+              - "{{ image }}"
+        rescue:
+          - name: Wait for device to perform all checks 
+            wait_for:
+              port: 22
+              state: stopped
+              timeout: 300
+              delay: 60
+              host: "{{ inventory_hostname }}"
+
+          - name: Wait For Device To Come Back Up
+            wait_for:
+              port: 22
+              state: started
+              timeout: 300
+              delay: 60
+              host: "{{ inventory_hostname }}"
+
+          - name: Check installed OS after upgrade
+            nxos_command:
+              commands:
+                - show version
+              provider: "{{ nxos_provider }}"
+            register: output
+          - name: Print installed OS
+            debug: msg="{{output['stdout'][0]['kickstart_ver_str']}}"
+          - name: Assert That It is Running The Desired Image
+            assert:
+              that:
+                - output['stdout'][0]['kickstart_ver_str'] == '7.0(3)I6(1)'
+

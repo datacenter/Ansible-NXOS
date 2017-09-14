@@ -1,0 +1,64 @@
+---
+
+  - name: Check OS Version, BGP + VPC state
+    hosts: leaves
+    connection: local
+    gather_facts: no
+
+    vars:
+      nxos_provider:
+        username: "{{ un }}"
+        password: "{{ pwd }}"
+        transport: nxapi
+        host: "{{ inventory_hostname }}"
+
+    tasks:
+      - name: Check installed OS version before upgrade
+        nxos_command:
+          commands:
+            - show version
+          provider: "{{ nxos_provider }}"
+        register: output
+      
+      - name: Print installed OS
+        debug: msg="{{output['stdout'][0]['kickstart_ver_str']}}"
+      - name: Assert That Switch is Currently Running Correct Image
+        assert:
+          that:
+            - output['stdout'][0]['kickstart_ver_str'] == "{{ existing_kickstart }}"
+
+      - name: Check VPC state
+        nxos_command:
+          commands:
+            - show vpc
+          provider: "{{ nxos_provider }}"
+        register: output
+      - name: Print VPC peer status
+        debug: msg="{{output['stdout_lines'][0]['vpc-peer-status']}}"
+
+      - name: Assert That VPC status is correct
+        assert:
+          that:
+           - output['stdout_lines'][0]['vpc-peer-status'] == 'peer-ok'
+           - output['stdout_lines'][0]['vpc-peer-keepalive-status'] == 'peer-alive'
+        
+      - name: Check BGP state
+        nxos_command:
+          commands:
+            - show bgp sessions
+          provider: "{{ nxos_provider }}"
+        register: output
+      - name: Print state of all BGP peers
+        debug: msg="{{output['stdout_lines'][0]['TABLE_vrf']['ROW_vrf']['TABLE_neighbor']['ROW_neighbor']}}"
+      
+      - name: Assert That BGP Peering is Established
+        assert:
+          that:
+           item['state'] == 'Established'
+        with_items:
+            - "{{output['stdout_lines'][0]['TABLE_vrf']['ROW_vrf']['TABLE_neighbor']['ROW_neighbor']}}"
+
+      - name: See What Switches Passed All Tests
+        debug: msg="Switch '{{inventory_hostname}}' passed all tests"
+
+

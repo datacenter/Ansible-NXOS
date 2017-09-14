@@ -1,0 +1,50 @@
+---
+
+  - name: Copy Image To All Devices And Check MD5 Sum
+    hosts: leaves
+    connection: local
+    gather_facts: no
+
+    vars:
+      nxos_provider:
+        username: "{{ un }}"
+        password: "{{ pwd }}"
+        transport: nxapi
+        host: "{{ inventory_hostname }}"
+
+    tasks:
+      - name: Copy File to the Switch
+        nxos_file_copy:
+          local_file: "/etc/scp_server/{{ item.file_name }}"
+          provider: "{{ nxos_provider }}"
+        with_items:
+        - "{{ image }}"
+
+      # - name: Copy From File Server to All Switches
+      #   synchronize: src=/copy/from_File_Server dest=/copy/to_Switches
+      #   delegate_to: File Server
+
+
+      - name: Check MD5 Sum
+        nxos_command:
+          commands:
+            - "show file bootflash:{{item.file_name }} md5sum"
+          provider: "{{ nxos_provider }}"
+        with_items:
+          - "{{ image }}"
+        register: output
+
+        
+
+      - name: Print MD5 As Calculated On The Switch
+        debug: msg="{{output['results'][0]['stdout'][0]['file_content_md5sum'][:-1]}}"
+      - name: Assert that MD5 on Switch Is Correct
+        assert:
+          that:
+            - output['results'][0]['stdout'][0]['file_content_md5sum'][:-1] == "{{ item.md5 }}"
+        with_items:
+          - "{{ image }}"
+
+
+
+
