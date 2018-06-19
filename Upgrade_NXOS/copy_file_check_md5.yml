@@ -20,10 +20,6 @@
         with_items:
         - "{{ image }}"
 
-      # - name: Copy From File Server to All Switches
-      #   synchronize: src=/copy/from_File_Server dest=/copy/to_Switches
-      #   delegate_to: File Server
-
 
       - name: Check MD5 Sum
         nxos_command:
