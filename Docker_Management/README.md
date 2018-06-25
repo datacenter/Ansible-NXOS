@@ -1,5 +1,8 @@
 This README contains some additional background information for managing Docker on the Nexus 9000 series switch.
 
+Using Ansible to manage docker in the native bash environment is only supported on Nexus 9000 switches running image version `9.2(1)` or later.
+
+
 # Table of contents 
 
 1. [Create Ansible Hosts File](#hosts)
