@@ -1,0 +1,25 @@
+# This Ansible inventory file defines connections to both the
+# NXOS vegas-shell and the native linux bash-shell.
+#
+
+# -----------------------------------------------------#
+# Define connections and variables for the vegas-shell #
+# -----------------------------------------------------#
+
+[nxos_vsh]
+n9k.example.com
+
+[nxos_vsh:vars]
+ansible_connection=local
+
+# -----------------------------------------------------------#
+# Define connections and variables for the native bash-shell #
+# -----------------------------------------------------------#
+
+[nxos_bash]
+n9k-bash ansible_host=n9k.example.com
+
+[nxos_bash:vars]
+ansible_connection=ssh
+ansible_user=devops
+ansible_ssh_pass=devopspassword
