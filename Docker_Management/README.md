@@ -10,7 +10,7 @@ Using Ansible to manage docker in the native bash environment is only supported 
 
 
 ## <a name="hosts">Create Ansible Hosts File</a>
-Create the Ansible hosts file that will allow you to manage the NXOS device using both the `vegas shell(vsh)` and `bash shell` environments.
+Create the Ansible hosts file that will allow you to manage the NXOS device using both the `vegas-shell(vsh)` and `bash -shell` environments.
 
 Add the following to your `/etc/ansible/hosts` file but replace the host information with your specific host.
 ```yaml
