@@ -155,4 +155,4 @@ Contents of `manage_docker_on_nxos.yaml`:
       become_method: sudo
 ```
 
-This yaml file is included in this repository and can be accessed here: [Manage Docker Playbook](./manage_docker_on_nxos)
+This yaml file is included in this repository and can be accessed here: [Manage Docker Playbook](./manage_docker_on_nxos.yaml)
