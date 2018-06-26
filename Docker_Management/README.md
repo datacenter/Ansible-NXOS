@@ -157,9 +157,3 @@ Contents of `manage_docker_on_nxos.yaml`:
 ```
 
 This yaml file is included in this repository and can be accessed here: [Manage Docker Playbook](./manage_docker_on_nxos)
-
-
-Now run the playbook.
-
-```shell
-```
