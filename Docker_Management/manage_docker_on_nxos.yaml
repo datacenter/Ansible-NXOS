@@ -50,12 +50,6 @@
       become: yes
       become_method: sudo
 
-    - name: Pip install docker-py package
-      command: ip netns exec management pip install docker-py
-      become: yes
-      become_method: sudo
-
-
     # Uncomment the following 3 tasks if a proxy is needed for
     # Network connectivity to the PyPY server.
 
@@ -81,6 +75,11 @@
     #    state: restarted
     #  become: yes
     #  become_method: sudo
+
+    - name: Pip install docker-py package
+      command: ip netns exec management pip install docker-py
+      become: yes
+      become_method: sudo
 
     - name: Pull Ubuntu Docker Image
       docker_image:
