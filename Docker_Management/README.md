@@ -110,12 +110,6 @@ Contents of `manage_docker_on_nxos.yaml`:
       become: yes
       become_method: sudo
 
-    - name: Pip install docker-py package
-      command: ip netns exec management pip install docker-py
-      become: yes
-      become_method: sudo
-
-
     # Uncomment the following 3 tasks if a proxy is needed for
     # Network connectivity to the PyPY server.
 
@@ -141,6 +135,11 @@ Contents of `manage_docker_on_nxos.yaml`:
     #    state: restarted
     #  become: yes
     #  become_method: sudo
+
+    - name: Pip install docker-py package
+      command: ip netns exec management pip install docker-py
+      become: yes
+      become_method: sudo
 
     - name: Pull Ubuntu Docker Image
       docker_image:
