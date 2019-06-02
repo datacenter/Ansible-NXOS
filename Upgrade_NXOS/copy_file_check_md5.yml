@@ -1,7 +1,7 @@
 ---
 
   - name: Copy Image To All Devices And Check MD5 Sum
-    hosts: leaves
+    hosts: leafs
     connection: local
     gather_facts: no
 
