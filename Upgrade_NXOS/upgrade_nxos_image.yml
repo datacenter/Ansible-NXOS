@@ -1,7 +1,7 @@
 ---
 
   - name: Upgrade NXOS version from 7.0(3)I7(1) to 7.0(3)I7(3)
-    hosts: leaves
+    hosts: leafs
     connection: local
     gather_facts: no
 
