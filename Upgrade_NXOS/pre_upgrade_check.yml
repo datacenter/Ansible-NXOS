@@ -1,7 +1,7 @@
 ---
 
   - name: Check OS Version, BGP + VPC state
-    hosts: leaves
+    hosts: leafs
     connection: local
     gather_facts: no
 
