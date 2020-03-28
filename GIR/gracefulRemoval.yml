@@ -1,0 +1,51 @@
+---
+
+- name: Put Spine-2 in Maintenance Mode
+  hosts: GNS3-n9kv-leafs
+  connection: local
+  gather_facts: no
+
+  tasks:
+    - name: Check BGP State On All Leafs To Ensure 100% Connectivity
+      nxos_command:
+        commands:
+          - show bgp sessions
+        provider: "{{ nxos_provider }}"
+      register: output
+    - name: Print state of all Leaf BGP peers
+      debug: msg="{{output['stdout_lines'][0]['TABLE_vrf']['ROW_vrf']['TABLE_neighbor']['ROW_neighbor']}}"
+    
+    - name: Assert That BGP Peering is Established
+      assert:
+        that:
+         item['state'] == 'Established'
+      with_items:
+          - "{{output['stdout_lines'][0]['TABLE_vrf']['ROW_vrf']['TABLE_neighbor']['ROW_neighbor']}}"
+
+    - name: See What Switches Passed All Tests
+      debug: msg="Switch '{{inventory_hostname}}' passed all tests"
+
+- hosts: GNS3-n9kv-spine-2
+  tasks:
+    - name: Take snapshop prior to Graceful Removal
+      nxos_snapshot:
+        action: create
+        snapshot_name: before_maintenance
+        provider: "{{ nxos_provider }}"
+        description: Done with Ansible
+
+    - name: "Put system in maintenance mode"
+      nxos_gir:
+        system_mode_maintenance: true
+        provider: "{{ nxos_provider }}"
+      register: result
+
+    - name: Check Maintenance Mode Status
+      nxos_command:
+        commands:
+          - show system mode
+        provider: "{{ nxos_provider }}"
+      register: output
+
+    - name: Print state of the system
+      debug: msg="{{ output['stdout_lines'][0] }}"

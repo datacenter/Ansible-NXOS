@@ -1,0 +1,69 @@
+---
+
+- name: Bring Spine-2 in System Mode
+  hosts: GNS3-n9kv-spine-2
+  connection: local
+  gather_facts: no
+
+  tasks:
+    - name: "Bring switch out of maintenance mode"
+      nxos_gir:
+        system_mode_maintenance: false
+        provider: "{{ nxos_provider }}"
+      register: result
+
+    - name: Allow Time For Reconvergence
+      pause:
+        minutes: 1
+
+    - name: Take snapshop after Graceful Insertion
+      nxos_snapshot:
+        action: create
+        snapshot_name: after_maintenance
+        provider: "{{ nxos_provider }}"
+        description: Done with Ansible
+
+    - name: Compare 2 Snapshots and save comparison locally
+      nxos_snapshot:
+        action: compare
+        snapshot1: before_maintenance
+        snapshot2: after_maintenance
+        comparison_results_file: compare_snapshots_summary.txt
+        compare_option: summary
+        path: './snapshots/'
+        provider: "{{ nxos_provider }}"
+
+    - name: Compare 2 Snapshots and save comparison locally. Summary
+      nxos_snapshot:
+        action: compare
+        snapshot1: before_maintenance
+        snapshot2: after_maintenance
+        comparison_results_file: compare_snapshots.txt
+        path: './snapshots/'
+        provider: "{{ nxos_provider }}"
+
+    - name: Show results
+      nxos_command:
+        commands:
+          - show bgp sessions
+        provider: "{{ nxos_provider }}"
+      register: output
+
+
+    - name: Check BGP State On Switch To Ensure 100% Connectivity
+      nxos_command:
+        commands:
+          - show bgp sessions
+        provider: "{{ nxos_provider }}"
+      register: output
+    - name: Print state of all BGP peers
+      debug: msg="{{output['stdout_lines'][0]['TABLE_vrf']['ROW_vrf']['TABLE_neighbor']['ROW_neighbor']}}"
+    
+    - name: Assert That BGP Peering is Established
+      assert:
+        that:
+         item['state'] == 'Established'
+      with_items:
+          - "{{output['stdout_lines'][0]['TABLE_vrf']['ROW_vrf']['TABLE_neighbor']['ROW_neighbor']}}"
+
+

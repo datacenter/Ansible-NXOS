@@ -1,0 +1,24 @@
+
+================================================================================
+Feature                         before_maintenanceafter_maintenance changed 
+================================================================================
+basic summary
+  # of interfaces                        130             130       
+  # of vlans                               1               1       
+  # of ipv4 routes vrf default            20              20       
+  # of ipv4 paths  vrf default            23              23       
+  # of ipv4 routes vrf management         10              10       
+  # of ipv4 paths  vrf management         10              10       
+  # of ipv6 routes vrf default             3               3       
+  # of ipv6 paths  vrf default             3               3       
+
+interfaces
+  # of eth interfaces                    128             128       
+  # of eth interfaces up                   9               9       
+  # of eth interfaces down               119             119       
+  # of eth interfaces other                0               0       
+
+  # of vlan interfaces                     1               1       
+  # of vlan interfaces up                  0               0       
+  # of vlan interfaces down                1               1       
+  # of vlan interfaces other               0               0       

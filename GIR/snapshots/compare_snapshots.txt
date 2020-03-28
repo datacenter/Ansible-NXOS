@@ -1,0 +1,121 @@
+
+================================================================================
+Feature             Tag            before_maintenance after_maintenance 
+================================================================================
+
+[bgp]
+--------------------------------------------------------------------------------
+
+      [vrf-name-out:default]
+      [neighbor-id:3.3.3.3]
+                    lastflap             PT5M24S            **PT11M38S**      
+                    lastread             PT27S              **PT9S**          
+                    lastwrite            PT26S              **PT6S**          
+
+      [vrf-name-out:default]
+      [neighbor-id:4.4.4.4]
+                    lastflap             PT5M23S            **PT11M38S**      
+                    lastread             PT27S              **PT57S**         
+                    lastwrite            PT26S              **PT6S**          
+
+      [vrf-name-out:default]
+      [neighbor-id:5.5.5.5]
+                    lastflap             PT5M32S            **PT11M46S**      
+                    lastread             PT27S              **PT8S**          
+                    lastwrite            PT26S              **PT6S**          
+
+[interface]
+--------------------------------------------------------------------------------
+
+      [interface:mgmt0]
+                    vdc_lvl_in_avg_bits  1616               **784**           
+                    vdc_lvl_in_avg_pkts  1                  **0**             
+                    vdc_lvl_out_avg_bits 32                 **136**           
+                    vdc_lvl_in_pkts      2560               **2928**          
+                    vdc_lvl_in_ucast     1782               **1837**          
+                    vdc_lvl_in_mcast     700                **1000**          
+                    vdc_lvl_in_bcast     78                 **91**            
+                    vdc_lvl_in_bytes     318417             **361041**        
+                    vdc_lvl_out_pkts     1319               **1363**          
+                    vdc_lvl_out_ucast    1301               **1338**          
+                    vdc_lvl_out_mcast    15                 **22**            
+                    vdc_lvl_out_bytes    616652             **632628**        
+
+      [interface:Ethernet1/1]
+                    eth_link_flapped     00:07:45           **00:13:59**      
+
+      [interface:Ethernet1/2]
+                    eth_link_flapped     00:07:43           **00:13:57**      
+
+      [interface:Ethernet1/3]
+                    eth_link_flapped     00:07:42           **00:13:56**      
+
+      [interface:Ethernet1/4]
+                    eth_link_flapped     00:12:16           **00:18:30**      
+
+      [interface:Ethernet1/5]
+                    eth_link_flapped     00:12:16           **00:18:30**      
+
+      [interface:Ethernet1/6]
+                    eth_link_flapped     00:12:16           **00:18:30**      
+
+      [interface:Ethernet1/7]
+                    eth_link_flapped     00:12:16           **00:18:30**      
+
+      [interface:Ethernet1/8]
+                    eth_link_flapped     00:12:15           **00:18:29**      
+
+      [interface:Ethernet1/9]
+                    eth_link_flapped     00:12:15           **00:18:29**      
+
+[ospf]
+--------------------------------------------------------------------------------
+
+      [instance_number:1]
+      [cname:default]
+            [aname:0.0.0.1]
+                    age                  PT7M32S            **PT13M46S**      
+                    spf_runs             7                  **9**             
+                    lsa_crc              0x74b3b            **0x7473d**       
+
+[route-summary]
+--------------------------------------------------------------------------------
+
+      [vrf-name-out:default]
+      [addrf:ipv4]
+            [clientname:]
+                    clientnameuni        local              **am**            
+                    best-paths           4                  **3**             
+            [clientname:]
+                    clientnameuni        direct             **am**            
+                    best-paths           4                  **3**             
+            [clientname:]
+                    clientnameuni        broadcast          **am**            
+            [clientname:]
+                    clientnameuni        ospf-1             **am**            
+                    best-paths           9                  **3**             
+
+      [vrf-name-out:management]
+      [addrf:ipv4]
+            [clientname:]
+                    clientnameuni        local              **am**            
+                    best-paths           1                  **2**             
+            [clientname:]
+                    clientnameuni        direct             **am**            
+                    best-paths           1                  **2**             
+            [clientname:]
+                    clientnameuni        static             **am**            
+                    best-paths           1                  **2**             
+            [clientname:]
+                    clientnameuni        broadcast          **am**            
+                    best-paths           5                  **2**             
+
+[routev6-summary]
+--------------------------------------------------------------------------------
+
+      [vrf-name-out:default]
+      [addrf:ipv6]
+            [clientname:]
+                    clientnameuni        discard            **local**         
+                    best-paths           2                  **1**             
+

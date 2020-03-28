@@ -1,0 +1,10 @@
+---
+
+nxos_provider:
+  username: "{{ un }}"
+  password: "{{ pwd }}"
+  transport: nxapi
+  use_ssl: True 
+  validate_certs: False
+  timeout: 200
+  host: "{{ inventory_hostname }}"
